@@ -25,10 +25,17 @@ RUN mkdir -p /opt/jboss
 WORKDIR /opt/jboss
 
 # install JBoss EAP 6.4.0
+#ADD jboss-eap-6.4.0.zip  /opt/jboss/jboss-eap-6.4.0.zip
+#RUN unzip /opt/jboss/jboss-eap-6.4.0.zip
+ADD jboss-eap-6.4.0/jboss-eap-6.4/  /opt/jboss/jboss-eap-6.4/
 
 # set environment
+ENV JBOSS_HOME  /opt/jboss/jboss-eap-6.4
 
 # create JBoss console user
+RUN ls -la  $JBOSS_HOME/bin/
+RUN chmod -R  a+x $JBOSS_HOME/bin/
+RUN $JBOSS_HOME/bin/add-user.sh admin admin@2016 --silent
 
 # configure JBoss
 RUN echo "JAVA_OPTS=\"\$JAVA_OPTS -Djboss.bind.address=0.0.0.0 -Djboss.bind.address.management=0.0.0.0\"" >> $JBOSS_HOME/bin/standalone.conf
@@ -37,9 +44,10 @@ RUN echo "JAVA_OPTS=\"\$JAVA_OPTS -Djboss.bind.address=0.0.0.0 -Djboss.bind.addr
 RUN chown -R jboss:jboss /opt/jboss
 
 # JBoss ports
+EXPOSE 8080  9990  99999
 
 # start JBoss
-
+ENTRYPOINT $JBOSS_HOME/bin/standalone.sh -c  standalone-full-ha.xml 
 USER jboss
 
 CMD /bin/bash
